@@ -2,6 +2,7 @@
 {
   "short_name": "WordFlow",
   "name": "WordFlow Puzzle",
+  "description": "A minimal, ad-free word puzzle game. Connect letters to discover hidden words.",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3771/3771261.png",
@@ -10,8 +11,9 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "theme_color": "#0f172a",
   "background_color": "#0f172a"
 }
