@@ -150,10 +150,10 @@ const App: React.FC = () => {
 
   if (gameState === GameState.LOADING) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f172a] text-white p-8">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-        <h1 className="text-3xl font-black tracking-tighter text-blue-500">WORDFLOW</h1>
-        <p className="text-slate-400 mt-2 text-xs uppercase tracking-[0.3em] font-bold animate-pulse">Preparing Puzzle</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#042f2e] text-white p-8">
+        <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <h1 className="text-3xl font-black tracking-tighter text-cyan-400">WORDFLOW</h1>
+        <p className="text-teal-400/60 mt-2 text-xs uppercase tracking-[0.3em] font-bold animate-pulse">Preparing Puzzle</p>
       </div>
     );
   }
@@ -165,11 +165,11 @@ const App: React.FC = () => {
       <div className="flex justify-between items-center px-6 py-4 shrink-0">
         <div className="flex flex-col">
           <h1 className="text-2xl font-black tracking-tighter text-white leading-none">WORDFLOW</h1>
-          <span className="text-[10px] font-black tracking-widest text-blue-400 uppercase mt-1">LEVEL {levelNumber}</span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase mt-1">LEVEL {levelNumber}</span>
         </div>
         <div className="text-right">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Score</p>
-          <p className="text-3xl font-black text-blue-500 leading-none drop-shadow-lg">{score}</p>
+          <p className="text-[10px] text-teal-300/50 font-bold uppercase tracking-widest leading-none mb-1">Score</p>
+          <p className="text-3xl font-black text-cyan-400 leading-none drop-shadow-lg">{score}</p>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ const App: React.FC = () => {
         
         {isLevelFinished && !message && (
           <div className="absolute top-10 left-1/2 -translate-x-1/2 animate-pop z-50">
-            <div className="bg-blue-600 px-6 py-2 rounded-full shadow-2xl shadow-blue-900/50 border border-blue-400">
+            <div className="bg-cyan-700 px-6 py-2 rounded-full shadow-2xl shadow-teal-900/50 border border-cyan-400/50">
               <span className="text-sm font-black text-white uppercase tracking-[0.2em]">
                 {isSkipped ? "SOLVED" : "CHAPTER CLEAR"}
               </span>
@@ -190,7 +190,7 @@ const App: React.FC = () => {
       <div className="h-16 flex flex-col items-center justify-center shrink-0">
         {!isLevelFinished ? (
           <div className={`text-3xl font-black tracking-[0.25em] uppercase transition-all duration-200 transform
-            ${currentGuess ? 'text-white scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'text-slate-700/50 scale-100'}
+            ${currentGuess ? 'text-white scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'text-teal-900/40 scale-100'}
           `}>
             {currentGuess || "••••"}
           </div>
@@ -209,8 +209,8 @@ const App: React.FC = () => {
 
             <div className="flex-1 flex items-center justify-center">
               {message && (
-                <div className="px-4 py-1.5 rounded-full glass animate-pop border-blue-500/30">
-                  <span className="text-xs font-black text-blue-400 uppercase tracking-widest">{message}</span>
+                <div className="px-4 py-1.5 rounded-full glass animate-pop border-cyan-500/30">
+                  <span className="text-xs font-black text-cyan-400 uppercase tracking-widest">{message}</span>
                 </div>
               )}
             </div>
@@ -229,7 +229,7 @@ const App: React.FC = () => {
             <div className="w-full animate-pop flex flex-col items-center px-4">
               <button
                 onClick={nextLevel}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-6 rounded-[2.5rem] text-2xl shadow-2xl shadow-blue-500/30 transition-all active:scale-95 uppercase tracking-tight"
+                className="w-full bg-cyan-700 hover:bg-cyan-600 text-white font-black py-6 rounded-[2.5rem] text-2xl shadow-2xl shadow-cyan-900/30 transition-all active:scale-95 uppercase tracking-tight"
               >
                 Next Puzzle
               </button>
