@@ -1,13 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { wordEngine } from './services/wordEngine.ts';
 import { LevelData, GameState } from './types.ts';
 import LetterWheel from './components/LetterWheel.tsx';
 import CrosswordGrid from './components/CrosswordGrid.tsx';
 
 const App: React.FC = () => {
-  console.log("⚛️ App: Component function called (Render)");
-  
   const [gameState, setGameState] = useState<GameState>(GameState.LOADING);
   const [level, setLevel] = useState<LevelData | null>(null);
   const [currentGuess, setCurrentGuess] = useState("");
@@ -16,14 +14,12 @@ const App: React.FC = () => {
   const [levelNumber, setLevelNumber] = useState(1);
   const [isSkipped, setIsSkipped] = useState(false);
   const [revealedIndices, setRevealedIndices] = useState<Record<string, number[]>>({});
+  const [displayLetters, setDisplayLetters] = useState<string[]>([]);
 
   useEffect(() => {
-    console.info("⚛️ App: Mounting (useEffect)");
     const initGame = async () => {
-      console.info("🎮 App: Initializing WordEngine...");
       try {
         await wordEngine.init();
-        console.info("🎮 App: WordEngine initialized. Loading first level...");
         loadNewLevel(6);
       } catch (err) {
         console.error("❌ App: Failed to initialize WordEngine:", err);
@@ -33,13 +29,9 @@ const App: React.FC = () => {
   }, []);
 
   const loadNewLevel = (length: number) => {
-    console.info(`🎮 App: Generating new level with length: ${length}`);
     const nextLevelData = wordEngine.generateLevel(length);
-    console.info("🎮 App: Level generation complete", {
-      root: nextLevelData.rootLetters,
-      words: nextLevelData.validWords.length
-    });
     setLevel(nextLevelData);
+    setDisplayLetters(nextLevelData.displayLetters);
     setRevealedIndices({});
     setGameState(GameState.PLAYING);
     setMessage("");
@@ -48,44 +40,44 @@ const App: React.FC = () => {
 
   const handleWordComplete = (word: string) => {
     if (!level || gameState !== GameState.PLAYING) return;
-    console.log(`🎯 App: User submitted word: "${word}"`);
 
-    if (word.length < 4) {
-      if (word.length > 0) showTemporaryMessage("Too short!");
+    if (word.length < 3) {
+      if (word.length > 0) showTemporaryMessage("TOO SHORT");
       return;
     }
 
     if (level.foundWords.has(word)) {
-      showTemporaryMessage("Already found!");
+      showTemporaryMessage("ALREADY FOUND");
       return;
     }
 
     if (level.validWords.includes(word)) {
-      console.info(`🎯 App: Correct guess! "${word}"`);
       const updatedFound = new Set(level.foundWords);
       updatedFound.add(word);
       
       const newLevel = { ...level, foundWords: updatedFound };
       setLevel(newLevel);
       setScore(prev => prev + word.length * 10);
-      showTemporaryMessage("Great!", true);
+      showTemporaryMessage("AWESOME", true);
 
       if (updatedFound.size === level.validWords.length) {
-        console.info("🎉 App: Level complete!");
         setGameState(GameState.LEVEL_COMPLETE);
       }
     } else {
       if (wordEngine.isValidWord(word)) {
-        showTemporaryMessage("Valid word, but not here!");
+        showTemporaryMessage("EXTRA WORD!");
+        setScore(prev => prev + 5);
       } else {
-        showTemporaryMessage("Not a word!");
+        showTemporaryMessage("NOPE");
       }
     }
   };
 
   const handleHelp = () => {
-    if (!level || gameState !== GameState.PLAYING) return;
-    console.log("💡 App: Hint requested");
+    if (!level || score < 25) {
+      showTemporaryMessage("NEED 25 SCORE");
+      return;
+    }
 
     const hiddenCells: { x: number, y: number }[] = [];
     const visibleCoords = new Set<string>();
@@ -132,7 +124,7 @@ const App: React.FC = () => {
       return next;
     });
 
-    setScore(prev => Math.max(0, prev - 20));
+    setScore(prev => Math.max(0, prev - 25));
   };
 
   const handleGiveUp = () => {
@@ -141,28 +133,27 @@ const App: React.FC = () => {
     const allFound = new Set(level.validWords);
     setLevel({ ...level, foundWords: allFound });
     setGameState(GameState.LEVEL_COMPLETE);
-    showTemporaryMessage("Words revealed!");
   };
 
   const showTemporaryMessage = (msg: string, isPositive: boolean = false) => {
     setMessage(msg);
-    setTimeout(() => setMessage(""), 2000);
+    setTimeout(() => setMessage(""), 1500);
   };
 
   const nextLevel = () => {
     if (!isSkipped) {
       setLevelNumber(prev => prev + 1);
     }
-    const nextLen = Math.min(7, Math.max(5, (level?.rootLetters.length || 5) + (Math.random() > 0.6 ? 1 : 0)));
+    const nextLen = Math.min(7, Math.max(5, (level?.rootLetters.length || 5) + (Math.random() > 0.7 ? 1 : 0)));
     loadNewLevel(nextLen);
   };
 
   if (gameState === GameState.LOADING) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-8 text-center">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h1 className="text-2xl font-bold tracking-tight">WordFlow</h1>
-        <p className="text-slate-400 mt-2 text-sm uppercase tracking-widest font-bold">Building Puzzle...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f172a] text-white p-8">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <h1 className="text-3xl font-black tracking-tighter text-blue-500">WORDFLOW</h1>
+        <p className="text-slate-400 mt-2 text-xs uppercase tracking-[0.3em] font-bold animate-pulse">Preparing Puzzle</p>
       </div>
     );
   }
@@ -170,19 +161,15 @@ const App: React.FC = () => {
   const isLevelFinished = gameState === GameState.LEVEL_COMPLETE;
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900 text-white overflow-hidden safe-top safe-bottom select-none">
-      <div className="flex justify-between items-center px-4 py-3 border-b border-slate-800/50 shrink-0">
+    <div className="flex flex-col h-screen bg-transparent text-white overflow-hidden safe-top safe-bottom select-none">
+      <div className="flex justify-between items-center px-6 py-4 shrink-0">
         <div className="flex flex-col">
-          <h1 className="text-xl font-black tracking-tighter text-blue-400 leading-none">WORDFLOW</h1>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-black tracking-wider border border-blue-500/20 uppercase">
-              LEVEL {levelNumber}
-            </span>
-          </div>
+          <h1 className="text-2xl font-black tracking-tighter text-white leading-none">WORDFLOW</h1>
+          <span className="text-[10px] font-black tracking-widest text-blue-400 uppercase mt-1">LEVEL {levelNumber}</span>
         </div>
         <div className="text-right">
-          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Score</p>
-          <p className="text-2xl font-black text-blue-500 leading-none">{score}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Score</p>
+          <p className="text-3xl font-black text-blue-500 leading-none drop-shadow-lg">{score}</p>
         </div>
       </div>
 
@@ -190,69 +177,67 @@ const App: React.FC = () => {
         {level && <CrosswordGrid level={level} revealedIndices={revealedIndices} />}
         
         {isLevelFinished && !message && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 animate-pop">
-            <span className={`px-4 py-1.5 rounded-full text-xs font-black bg-blue-600 shadow-xl shadow-blue-900/40 text-white border border-blue-400 uppercase tracking-[0.2em]`}>
-              {isSkipped ? "WORDS REVEALED" : "LEVEL COMPLETE!"}
-            </span>
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 animate-pop z-50">
+            <div className="bg-blue-600 px-6 py-2 rounded-full shadow-2xl shadow-blue-900/50 border border-blue-400">
+              <span className="text-sm font-black text-white uppercase tracking-[0.2em]">
+                {isSkipped ? "SOLVED" : "CHAPTER CLEAR"}
+              </span>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="h-14 flex flex-col items-center justify-center shrink-0">
+      <div className="h-16 flex flex-col items-center justify-center shrink-0">
         {!isLevelFinished ? (
-          <div className={`text-2xl font-black tracking-[0.2em] uppercase transition-all duration-150 transform
-            ${currentGuess ? 'text-blue-400 scale-110' : 'text-slate-800 scale-100'}
+          <div className={`text-3xl font-black tracking-[0.25em] uppercase transition-all duration-200 transform
+            ${currentGuess ? 'text-white scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'text-slate-700/50 scale-100'}
           `}>
             {currentGuess || "••••"}
           </div>
-        ) : (
-          <div className="text-blue-400/50 text-xs font-black uppercase tracking-widest animate-pulse">
-            {isSkipped ? "TAP BELOW FOR NEXT" : "EXCELLENT WORK"}
-          </div>
-        )}
+        ) : null}
       </div>
 
-      <div className="flex flex-col items-center pb-8 shrink-0 relative">
+      <div className="flex flex-col items-center pb-10 shrink-0 relative">
         {!isLevelFinished && (
-          <div className="w-full max-w-[min(90vw,340px)] flex justify-between items-center mb-4 px-2">
+          <div className="w-full max-w-[min(90vw,360px)] flex justify-between items-center mb-6 px-4">
             <button 
               onClick={handleHelp}
-              className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+              className="w-14 h-14 rounded-full glass flex items-center justify-center shadow-lg active:scale-90 transition-transform"
             >
-              <span className="text-xl">💡</span>
+              <span className="text-2xl">💡</span>
             </button>
 
-            <div className="flex-1 px-4 flex items-center justify-center min-h-[24px]">
+            <div className="flex-1 flex items-center justify-center">
               {message && (
-                <span className="px-3 py-1 rounded-full text-[10px] font-black animate-pop bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest text-center">
-                  {message}
-                </span>
+                <div className="px-4 py-1.5 rounded-full glass animate-pop border-blue-500/30">
+                  <span className="text-xs font-black text-blue-400 uppercase tracking-widest">{message}</span>
+                </div>
               )}
             </div>
 
             <button 
               onClick={handleGiveUp}
-              className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+              className="w-14 h-14 rounded-full glass flex items-center justify-center shadow-lg active:scale-90 transition-transform"
             >
-              <span className="text-xl">🏳️</span>
+              <span className="text-2xl">🚩</span>
             </button>
           </div>
         )}
 
-        <div className="w-full max-w-[min(90vw,340px)] min-h-[280px] flex items-center justify-center">
+        <div className="w-full max-w-[min(90vw,360px)] min-h-[320px] flex items-center justify-center">
           {isLevelFinished ? (
-            <div className="w-full animate-pop flex flex-col items-center">
+            <div className="w-full animate-pop flex flex-col items-center px-4">
               <button
                 onClick={nextLevel}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-6 rounded-[2rem] text-2xl shadow-2xl shadow-blue-500/30 transition-all active:scale-95 active:shadow-none uppercase tracking-tighter"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-6 rounded-[2.5rem] text-2xl shadow-2xl shadow-blue-500/30 transition-all active:scale-95 uppercase tracking-tight"
               >
-                Continue
+                Next Puzzle
               </button>
             </div>
           ) : (
             level && (
               <LetterWheel
-                letters={level.displayLetters}
+                letters={displayLetters}
                 currentWord={currentGuess}
                 setCurrentWord={setCurrentGuess}
                 onWordComplete={handleWordComplete}
@@ -261,9 +246,6 @@ const App: React.FC = () => {
           )}
         </div>
       </div>
-      
-      {/* Spacer for debug console */}
-      <div className="h-[120px] shrink-0 pointer-events-none opacity-0"></div>
     </div>
   );
 };

@@ -18,7 +18,6 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
     const updateSize = () => {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
-        console.log(`🎡 LetterWheel: Dimension update - ${Math.round(width)}x${Math.round(height)}`);
         setDimensions({ width, height });
       }
     };
@@ -29,8 +28,8 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
 
   const centerX = dimensions.width / 2;
   const centerY = dimensions.height / 2;
-  const letterRadius = dimensions.width * 0.32;
-  const selectionThreshold = dimensions.width * 0.12;
+  const letterRadius = dimensions.width * 0.34;
+  const selectionThreshold = dimensions.width * 0.14;
 
   const letterPositions = useMemo(() => {
     if (dimensions.width === 0) return [];
@@ -42,7 +41,7 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
         index: i
       };
     });
-  }, [letters.length, dimensions, centerX, centerY, letterRadius]);
+  }, [letters, dimensions, centerX, centerY, letterRadius]);
 
   const updatePointerPosition = (clientX: number, clientY: number) => {
     if (!containerRef.current) return;
@@ -54,10 +53,10 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
   };
 
   const handleStart = (index: number, clientX: number, clientY: number) => {
-    console.log(`🎡 LetterWheel: Interaction start with letter: ${letters[index]}`);
     setSelectedIndices([index]);
     setCurrentWord(letters[index]);
     updatePointerPosition(clientX, clientY);
+    if (navigator.vibrate) navigator.vibrate(5);
   };
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
@@ -75,15 +74,14 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
           setSelectedIndices(prev => {
             const next = [...prev, pos.index];
             const word = next.map(idx => letters[idx]).join('');
-            console.log(`🎡 LetterWheel: Added letter "${letters[pos.index]}". Current: "${word}"`);
             setCurrentWord(word);
+            if (navigator.vibrate) navigator.vibrate(10);
             return next;
           });
         } else if (selectedIndices.length > 1 && selectedIndices[selectedIndices.length - 2] === pos.index) {
           setSelectedIndices(prev => {
             const next = prev.slice(0, -1);
             const word = next.map(idx => letters[idx]).join('');
-            console.log(`🎡 LetterWheel: Backtracked. Current: "${word}"`);
             setCurrentWord(word);
             return next;
           });
@@ -94,7 +92,6 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
 
   const handleEnd = useCallback(() => {
     if (selectedIndices.length > 0) {
-      console.log(`🎡 LetterWheel: Interaction end. Final word: "${currentWord}"`);
       onWordComplete(currentWord.toLowerCase());
     }
     setSelectedIndices([]);
@@ -117,19 +114,19 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
     };
   }, [selectedIndices.length, handleMove, handleEnd]);
 
-  const wheelSizeClass = "w-[min(75vw,280px)] h-[min(75vw,280px)]";
+  const wheelSizeClass = "w-[min(80vw,320px)] h-[min(80vw,320px)]";
 
   return (
     <div 
       className={`relative ${wheelSizeClass} mx-auto no-select touch-none`} 
       ref={containerRef}
     >
-      <div className="absolute inset-0 rounded-full bg-slate-800/30 border-4 border-slate-700/50 shadow-inner"></div>
+      <div className="absolute inset-0 rounded-full bg-slate-800/20 border-2 border-slate-700/30 backdrop-blur-sm shadow-2xl"></div>
       
-      <svg className="absolute inset-0 pointer-events-none w-full h-full overflow-visible">
+      <svg className="absolute inset-0 pointer-events-none w-full h-full overflow-visible z-10">
         <defs>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
@@ -137,27 +134,28 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
         {selectedIndices.length > 1 && (
           <path
             d={selectedIndices.map((idx, i) => {
-              const pos = letterPositions[idx];
+              const pos = letterPositions.find(p => p.index === idx);
+              if (!pos) return '';
               return `${i === 0 ? 'M' : 'L'} ${pos.x} ${pos.y}`;
             }).join(' ')}
             fill="none"
-            stroke="#3b82f6"
-            strokeWidth={dimensions.width * 0.04}
+            stroke="#60a5fa"
+            strokeWidth={dimensions.width * 0.05}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="opacity-60 transition-all duration-75"
+            className="opacity-70 transition-all duration-75"
             filter="url(#glow)"
           />
         )}
 
         {selectedIndices.length > 0 && pointerPos && (
           <line
-            x1={letterPositions[selectedIndices[selectedIndices.length - 1]].x}
-            y1={letterPositions[selectedIndices[selectedIndices.length - 1]].y}
+            x1={letterPositions.find(p => p.index === selectedIndices[selectedIndices.length - 1])?.x}
+            y1={letterPositions.find(p => p.index === selectedIndices[selectedIndices.length - 1])?.y}
             x2={pointerPos.x}
             y2={pointerPos.y}
-            stroke="#3b82f6"
-            strokeWidth={dimensions.width * 0.04}
+            stroke="#60a5fa"
+            strokeWidth={dimensions.width * 0.05}
             strokeLinecap="round"
             className="opacity-40"
           />
@@ -171,16 +169,16 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
 
         return (
           <div
-            key={pos.index}
+            key={`${pos.index}-${letters[pos.index]}`}
             onPointerDown={(e) => {
               e.preventDefault();
               handleStart(pos.index, e.clientX, e.clientY);
             }}
-            className={`absolute flex items-center justify-center rounded-full font-extrabold transition-all duration-150 transform cursor-pointer select-none
+            className={`absolute flex items-center justify-center rounded-full font-extrabold transition-all duration-300 transform cursor-pointer select-none
               ${isSelected 
-                ? 'bg-blue-500 text-white scale-110 shadow-[0_0_20px_rgba(59,130,246,0.5)] z-10' 
-                : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}
-              ${isLast ? 'ring-4 ring-blue-300 ring-opacity-50' : ''}
+                ? 'bg-blue-500 text-white scale-110 shadow-[0_0_25px_rgba(59,130,246,0.6)] z-20' 
+                : 'bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700/50'}
+              ${isLast ? 'ring-4 ring-blue-300 ring-opacity-40' : ''}
             `}
             style={{ 
               left: pos.x, 

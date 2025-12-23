@@ -41,11 +41,11 @@ const CrosswordGrid: React.FC<CrosswordGridProps> = ({ level, revealedIndices })
   });
 
   const maxDim = Math.max(gridWidth, gridHeight);
-  const cellSize = `min(${80 / maxDim}vw, ${320 / maxDim}px)`;
+  const cellSize = `min(${88 / maxDim}vw, ${360 / maxDim}px)`;
 
   return (
     <div 
-      className="grid gap-1 mx-auto"
+      className="grid gap-1.5 mx-auto p-2"
       style={{
         gridTemplateColumns: `repeat(${gridWidth}, ${cellSize})`,
         width: 'fit-content'
@@ -60,12 +60,12 @@ const CrosswordGrid: React.FC<CrosswordGridProps> = ({ level, revealedIndices })
             <div
               key={`${x}-${y}`}
               style={{ width: cellSize, height: cellSize }}
-              className={`flex items-center justify-center rounded-sm text-[min(4vw,18px)] font-black transition-all duration-500 border
+              className={`flex items-center justify-center rounded-lg text-[min(5vw,22px)] font-black transition-all duration-500 border
                 ${status === 'found' 
-                  ? 'bg-blue-600 border-blue-400 text-white animate-pop shadow-md shadow-blue-900/40' 
+                  ? 'bg-blue-600 border-blue-400 text-white animate-success shadow-lg shadow-blue-900/40 z-10' 
                   : status === 'hinted'
-                    ? 'bg-slate-800 border-slate-700 text-blue-400/70'
-                    : 'bg-slate-800/40 border-slate-800 text-transparent'}`}
+                    ? 'bg-slate-800/80 border-slate-700 text-blue-400/80'
+                    : 'bg-white/5 border-white/10 text-transparent'}`}
             >
               {(status === 'found' || status === 'hinted') ? char : ''}
             </div>
