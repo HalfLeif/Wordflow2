@@ -125,7 +125,7 @@ const CrosswordGrid: React.FC<CrosswordGridProps> = ({ level, revealedIndices })
                     ? 'bg-teal-600 border-teal-300 text-white animate-success shadow-lg shadow-teal-950/40 z-10' 
                     : status === 'hinted'
                       ? 'bg-teal-900/40 border-teal-700/50 text-teal-200/80'
-                      : 'bg-teal-500/5 border-teal-500/10 text-transparent'}`}
+                      : 'bg-black/30 border-teal-400/30 text-transparent'}`}
               >
                 {(status === 'found' || status === 'hinted') ? char : ''}
               </div>
