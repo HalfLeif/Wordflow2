@@ -114,14 +114,14 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
     };
   }, [selectedIndices.length, handleMove, handleEnd]);
 
-  const wheelSizeClass = "w-[min(80vw,320px)] h-[min(80vw,320px)]";
+  const wheelSizeClass = "w-[min(48vw,192px)] h-[min(48vw,192px)]";
 
   return (
     <div 
       className={`relative ${wheelSizeClass} mx-auto no-select touch-none`} 
       ref={containerRef}
     >
-      <div className="absolute inset-0 rounded-full bg-slate-800/20 border-2 border-slate-700/30 backdrop-blur-sm shadow-2xl"></div>
+      <div className="absolute inset-0 rounded-full bg-teal-900/20 border-2 border-teal-500/20 backdrop-blur-sm shadow-2xl"></div>
       
       <svg className="absolute inset-0 pointer-events-none w-full h-full overflow-visible z-10">
         <defs>
@@ -139,7 +139,7 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
               return `${i === 0 ? 'M' : 'L'} ${pos.x} ${pos.y}`;
             }).join(' ')}
             fill="none"
-            stroke="#60a5fa"
+            stroke="#2dd4bf"
             strokeWidth={dimensions.width * 0.05}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -154,7 +154,7 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
             y1={letterPositions.find(p => p.index === selectedIndices[selectedIndices.length - 1])?.y}
             x2={pointerPos.x}
             y2={pointerPos.y}
-            stroke="#60a5fa"
+            stroke="#2dd4bf"
             strokeWidth={dimensions.width * 0.05}
             strokeLinecap="round"
             className="opacity-40"
@@ -176,9 +176,9 @@ const LetterWheel: React.FC<LetterWheelProps> = ({ letters, onWordComplete, curr
             }}
             className={`absolute flex items-center justify-center rounded-full font-extrabold transition-all duration-300 transform cursor-pointer select-none
               ${isSelected 
-                ? 'bg-blue-500 text-white scale-110 shadow-[0_0_25px_rgba(59,130,246,0.6)] z-20' 
-                : 'bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700/50'}
-              ${isLast ? 'ring-4 ring-blue-300 ring-opacity-40' : ''}
+                ? 'bg-teal-500 text-white scale-110 shadow-[0_0_25px_rgba(45,212,191,0.6)] z-20' 
+                : 'bg-teal-950/60 text-teal-50 hover:bg-teal-900 border border-teal-500/30'}
+              ${isLast ? 'ring-4 ring-teal-300 ring-opacity-40' : ''}
             `}
             style={{ 
               left: pos.x, 

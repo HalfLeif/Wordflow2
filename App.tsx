@@ -66,7 +66,7 @@ const App: React.FC = () => {
     } else {
       if (wordEngine.isValidWord(word)) {
         showTemporaryMessage("EXTRA WORD!");
-        setScore(prev => prev + 5);
+        setScore(prev => prev + 10);
       } else {
         showTemporaryMessage("NOPE");
       }
@@ -151,8 +151,8 @@ const App: React.FC = () => {
   if (gameState === GameState.LOADING) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#042f2e] text-white p-8">
-        <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-        <h1 className="text-3xl font-black tracking-tighter text-cyan-400">WORDFLOW</h1>
+        <div className="w-16 h-16 border-4 border-teal-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <h1 className="text-3xl font-black tracking-tighter text-teal-300">WORDFLOW</h1>
         <p className="text-teal-400/60 mt-2 text-xs uppercase tracking-[0.3em] font-bold animate-pulse">Preparing Puzzle</p>
       </div>
     );
@@ -162,23 +162,25 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-transparent text-white overflow-hidden safe-top safe-bottom select-none">
-      <div className="flex justify-between items-center px-6 py-4 shrink-0">
+      {/* Header */}
+      <div className="flex justify-between items-center px-6 py-4 shrink-0 z-50 glass border-none shadow-none bg-transparent">
         <div className="flex flex-col">
           <h1 className="text-2xl font-black tracking-tighter text-white leading-none">WORDFLOW</h1>
-          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase mt-1">LEVEL {levelNumber}</span>
+          <span className="text-[10px] font-black tracking-widest text-teal-300 uppercase mt-1">LEVEL {levelNumber}</span>
         </div>
         <div className="text-right">
           <p className="text-[10px] text-teal-300/50 font-bold uppercase tracking-widest leading-none mb-1">Score</p>
-          <p className="text-3xl font-black text-cyan-400 leading-none drop-shadow-lg">{score}</p>
+          <p className="text-3xl font-black text-teal-300 leading-none drop-shadow-lg">{score}</p>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
+      {/* Main Grid Area */}
+      <div className="flex-1 overflow-hidden relative">
         {level && <CrosswordGrid level={level} revealedIndices={revealedIndices} />}
         
         {isLevelFinished && !message && (
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 animate-pop z-50">
-            <div className="bg-cyan-700 px-6 py-2 rounded-full shadow-2xl shadow-teal-900/50 border border-cyan-400/50">
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 animate-pop z-50 pointer-events-none">
+            <div className="bg-teal-700 px-6 py-2 rounded-full shadow-2xl shadow-teal-950/50 border border-teal-400/50">
               <span className="text-sm font-black text-white uppercase tracking-[0.2em]">
                 {isSkipped ? "SOLVED" : "CHAPTER CLEAR"}
               </span>
@@ -187,63 +189,75 @@ const App: React.FC = () => {
         )}
       </div>
 
-      <div className="h-16 flex flex-col items-center justify-center shrink-0">
-        {!isLevelFinished ? (
-          <div className={`text-3xl font-black tracking-[0.25em] uppercase transition-all duration-200 transform
-            ${currentGuess ? 'text-white scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'text-teal-900/40 scale-100'}
-          `}>
-            {currentGuess || "••••"}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col items-center pb-10 shrink-0 relative">
-        {!isLevelFinished && (
-          <div className="w-full max-w-[min(90vw,360px)] flex justify-between items-center mb-6 px-4">
-            <button 
-              onClick={handleHelp}
-              className="w-14 h-14 rounded-full glass flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-            >
-              <span className="text-2xl">💡</span>
-            </button>
-
-            <div className="flex-1 flex items-center justify-center">
-              {message && (
-                <div className="px-4 py-1.5 rounded-full glass animate-pop border-cyan-500/30">
-                  <span className="text-xs font-black text-cyan-400 uppercase tracking-widest">{message}</span>
-                </div>
-              )}
+      {/* Bottom Control Section */}
+      <div className="flex flex-col items-center pb-2 shrink-0 z-50 bg-[#042f2e]/40 backdrop-blur-sm pt-2">
+        
+        {/* Word Preview */}
+        <div className="h-10 flex items-center justify-center mb-1 px-4">
+          {!isLevelFinished ? (
+            <div className={`text-2xl font-black tracking-[0.2em] uppercase transition-all duration-200 transform
+              ${currentGuess ? 'text-white scale-110 drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]' : 'text-teal-900/40 scale-100'}
+            `}>
+              {currentGuess || "••••"}
             </div>
+          ) : null}
+        </div>
 
-            <button 
-              onClick={handleGiveUp}
-              className="w-14 h-14 rounded-full glass flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-            >
-              <span className="text-2xl">🚩</span>
-            </button>
-          </div>
-        )}
-
-        <div className="w-full max-w-[min(90vw,360px)] min-h-[320px] flex items-center justify-center">
-          {isLevelFinished ? (
-            <div className="w-full animate-pop flex flex-col items-center px-4">
-              <button
-                onClick={nextLevel}
-                className="w-full bg-cyan-700 hover:bg-cyan-600 text-white font-black py-6 rounded-[2.5rem] text-2xl shadow-2xl shadow-cyan-900/30 transition-all active:scale-95 uppercase tracking-tight"
+        {/* Wheel & Corner Buttons Container */}
+        <div className="relative w-full max-w-[min(90vw,360px)] flex flex-col items-center">
+          
+          {/* Action Buttons - These remain as they were requested to be excluded from the theme shift */}
+          {!isLevelFinished && (
+            <div className="absolute top-0 w-full z-30 pointer-events-none flex justify-between px-2">
+              <button 
+                onClick={handleHelp}
+                className="w-12 h-12 rounded-full glass pointer-events-auto flex items-center justify-center shadow-lg active:scale-90 transition-transform"
               >
-                Next Puzzle
+                <span className="text-xl">💡</span>
+              </button>
+
+              {/* Feedback Message */}
+              <div className="flex-1 flex items-center justify-center px-2">
+                {message && (
+                  <div className="px-3 py-1 rounded-full glass animate-pop">
+                    <span className="text-[10px] font-black text-teal-300 uppercase tracking-[0.15em]">{message}</span>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={handleGiveUp}
+                className="w-12 h-12 rounded-full glass pointer-events-auto flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+              >
+                <span className="text-xl">🏳️</span>
               </button>
             </div>
-          ) : (
-            level && (
-              <LetterWheel
-                letters={displayLetters}
-                currentWord={currentGuess}
-                setCurrentWord={setCurrentGuess}
-                onWordComplete={handleWordComplete}
-              />
-            )
           )}
+
+          {/* Letter Wheel or Next Button */}
+          <div className="w-full flex items-center justify-center">
+            {isLevelFinished ? (
+              <div className="w-full animate-pop flex flex-col items-center px-4 pb-6 pt-4">
+                <button
+                  onClick={nextLevel}
+                  className="w-full bg-teal-700 hover:bg-teal-600 text-white font-black py-6 rounded-[2.5rem] text-2xl shadow-2xl shadow-teal-950/30 transition-all active:scale-95 uppercase tracking-tight"
+                >
+                  Next Puzzle
+                </button>
+              </div>
+            ) : (
+              level && (
+                <div className="py-2">
+                  <LetterWheel
+                    letters={displayLetters}
+                    currentWord={currentGuess}
+                    setCurrentWord={setCurrentGuess}
+                    onWordComplete={handleWordComplete}
+                  />
+                </div>
+              )
+            )}
+          </div>
         </div>
       </div>
     </div>
